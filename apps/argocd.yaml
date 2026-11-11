@@ -1,0 +1,32 @@
+# Argo CD manages itself from Git (installed once by bootstrap.sh).
+# Upgrading Argo CD = change targetRevision below, open a PR, merge.
+# NO finalizer: deleting this Application must never uninstall Argo CD mid-teardown.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 10.15.0 # Argo CD v3.6.1
+      helm:
+        releaseName: argocd # must match the bootstrap release name
+        valueFiles:
+          - $values/platform/argocd/values.yaml
+    - repoURL: https://github.com/devopsn3rd/eks-ai-remediation-config.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false # never let a typo delete Argo CD's own resources
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

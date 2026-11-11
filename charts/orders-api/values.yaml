@@ -1,0 +1,12 @@
+# Chart defaults. Environment values live in envs/lab/orders-api-values.yaml
+image:
+  repository: ""
+  tag: ""
+replicaCount: 2
+ballastMb: 0
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

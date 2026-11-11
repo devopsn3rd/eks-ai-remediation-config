@@ -1,0 +1,13 @@
+# Registers YOUR MCP server with kagent. kagent connects, discovers the tools
+# (query_logs, get_metric, list_image_tags, propose_fix) and lists them in
+# the RemoteMCPServer status.
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: orders-runbook
+  namespace: kagent
+spec:
+  description: Runbook tools for orders-api (CloudWatch logs/metrics, ECR tags, fix PRs)
+  protocol: STREAMABLE_HTTP
+  url: http://orders-runbook-mcp.kagent:8080/mcp
+  timeout: 60s

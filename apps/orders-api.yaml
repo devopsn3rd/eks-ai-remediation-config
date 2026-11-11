@@ -1,0 +1,29 @@
+# The workload the agent watches. Values in envs/lab are edited by CI (image tag)
+# and proposed by the agent (memory limit / rollback) through Pull Requests.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: orders-api
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/devopsn3rd/eks-ai-remediation-config.git
+    targetRevision: main
+    path: charts/orders-api
+    helm:
+      valueFiles:
+        - ../../envs/lab/orders-api-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orders
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,22 @@
+# The ONE Application created by hand (bootstrap.sh). It points at apps/,
+# where every other Application lives, including Argo CD itself.
+# No finalizer on purpose: deleting root leaves the children running,
+# so teardown.sh can delete them in a controlled order.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/devopsn3rd/eks-ai-remediation-config.git
+    targetRevision: main
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

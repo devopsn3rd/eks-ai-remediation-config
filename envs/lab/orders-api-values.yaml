@@ -1,0 +1,17 @@
+# Lab values for orders-api.
+# Lines ending in "# agent:..." are edited by machines:
+#   - CI writes the new image tag after every build (agent:image-tag)
+#   - the orders-sre agent may propose changes to them in a Pull Request
+# Keep the markers at the end of the line, or the edits stop working.
+image:
+  repository: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/orders-api
+  tag: "initial"  # agent:image-tag
+replicaCount: 2
+# Demo scenario A (guide 11.2): set to 150 to simulate a release that needs more RAM.
+ballastMb: 0
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi  # agent:memory-limit

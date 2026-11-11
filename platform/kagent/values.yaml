@@ -1,0 +1,42 @@
+# kagent v0.10.6 — values for the lab.
+
+# Default model for every agent: Claude Sonnet 5.5 on Amazon Bedrock.
+# The chart renders this into the ModelConfig "default-model-config".
+providers:
+  default: bedrock
+  bedrock:
+    provider: Bedrock
+    model: us.anthropic.claude-sonnet-5-5
+    config:
+      region: us-east-1
+      promptCaching: true # reuses the long system prompt + tool list between steps
+      # Optional (guide 8.6): let Bedrock also screen the model conversation.
+      # guardrail:
+      #   identifier: GUARDRAIL_ID
+      #   version: "1"
+
+# The bundled demo agents (10 of them) are not needed: we build our own.
+k8s-agent: { enabled: false }
+kgateway-agent: { enabled: false }
+istio-agent: { enabled: false }
+promql-agent: { enabled: false }
+observability-agent: { enabled: false }
+argo-rollouts-agent: { enabled: false }
+helm-agent: { enabled: false }
+cilium-policy-agent: { enabled: false }
+cilium-manager-agent: { enabled: false }
+cilium-debug-agent: { enabled: false }
+grafana-mcp: { enabled: false }
+
+# Built-in Kubernetes tools (our agent is allowed only the read-only ones).
+kagent-tools:
+  enabled: true
+
+# Bundled PostgreSQL stores sessions (dev/eval only, per the chart).
+database:
+  postgres:
+    sessionRetentionDays: 7
+    bundled:
+      enabled: true
+      storage: 1Gi
+      storageClassName: gp3

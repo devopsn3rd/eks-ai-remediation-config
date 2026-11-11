@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-bridge
+  labels:
+    app: alert-bridge
+spec:
+  replicas: 1 # exactly one: cooldown state is in memory
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: alert-bridge
+  template:
+    metadata:
+      labels:
+        app: alert-bridge
+    spec:
+      serviceAccountName: alert-bridge
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bridge
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/alert-bridge:initial  # ci:image
+          env:
+            - name: AWS_REGION
+              value: us-east-1
+            - name: QUEUE_NAME
+              value: eks-ai-remediation-alerts
+            - name: KAGENT_URL
+              value: http://kagent-controller.kagent:8083
+            - name: AGENT_REF
+              value: kagent/orders-sre
+            - name: COOLDOWN_SECONDS
+              value: "900"
+            - name: MAX_RUNS_PER_HOUR
+              value: "4"
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits: { memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

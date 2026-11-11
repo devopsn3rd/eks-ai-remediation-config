@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-runbook-mcp
+  labels:
+    app: orders-runbook-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-runbook-mcp
+  template:
+    metadata:
+      labels:
+        app: orders-runbook-mcp
+    spec:
+      serviceAccountName: orders-runbook-mcp
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: server
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/orders-runbook-mcp:initial  # ci:image
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: AWS_REGION
+              value: us-east-1
+            - name: CLUSTER_NAME
+              value: eks-ai-remediation
+            - name: APP_NAMESPACE
+              value: orders
+            - name: APP_WORKLOAD
+              value: orders-api
+            - name: ECR_REPOSITORY
+              value: orders-api
+            - name: GUARDRAIL_ID
+              value: GUARDRAIL_ID # from `terraform -chdir=foundation output guardrail_id`
+            - name: GUARDRAIL_VERSION
+              value: "1"
+            - name: GITHUB_TOKEN_SECRET
+              value: eks-ai-remediation/github-config-repo-token
+            - name: CONFIG_REPO
+              value: devopsn3rd/eks-ai-remediation-config
+            - name: VALUES_PATH
+              value: envs/lab/orders-api-values.yaml
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
